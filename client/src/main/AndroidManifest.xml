@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.p403n1x87.pi_mcqueen_controller">
+
+  <uses-sdk
+    android:minSdkVersion="21"
+    android:targetSdkVersion="23"
+  />
+
+  <uses-permission
+    android:name="android.permission.INTERNET"
+  />
+
+  <application
+    android:label="pi_mcqueen_controller"
+    android:theme="@android:style/Theme.Material">
+
+    <activity android:name="MainActivity" android:configChanges="orientation|screenSize">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>
