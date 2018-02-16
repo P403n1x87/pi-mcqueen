@@ -29,14 +29,18 @@ class GravitySensorManager {
       float z = event.values[2];
       float g = (float) sqrt(x*x + y*y + z*z);
       try {
-        webSocketClient.send(Float.toString(x/g*100) + " " + Float.toString(y/g*100) + " " + Float.toString(z/g*100));
+        byte[] data = new byte[3];
+        for (int i = 0; i < 3; i++) data[i] = new Float(event.values[i] / g * 127).byteValue();
+        webSocketClient.send(data);
       } catch (WebsocketNotConnectedException e) {
         Log.w("pi_mcqueen_controller", "Sensor updated but socket not connected");
       }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int a) {}
+    public void onAccuracyChanged(Sensor sensor, int a) {
+      Log.d("pi_mcqueen_controller", "accuracy changed: " + a);
+    }
   };
 
   public static void init(SensorManager sensorManager) {
