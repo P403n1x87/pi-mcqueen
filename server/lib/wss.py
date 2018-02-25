@@ -7,6 +7,7 @@ import websockets
 
 from .utils import logger_factory
 
+
 class WSServer:
     __srv_limit = None
     __srv_cnt   = 0
