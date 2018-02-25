@@ -9,16 +9,55 @@ from .utils import logger_factory
 
 
 class WSServer:
+    """
+    Abstract WebSocket Server class with a support for limiting the number of
+    simultaneous connections that can be accepted.
+
+    Any subclass is required to implement the `handler` method, which defines
+    how connections should be handled. The basic WebSocket Server
+    functionalities are encapsulated in this class for ease of use.
+
+    Once initialized, the server can be started with a call to `start`, and its
+    status can be monitored with the attribute `is_running`.
+
+    The general coding pattern in the implemented `handler` method looks like
+    the following code snippet
+
+    Example:
+
+        @asyncio.coroutine
+        def handler(self, websocket, path, connection_id):
+
+            #
+            # Initialization of local variables
+            #
+
+            while self.is_running:
+                try:
+                    data = yield from websocket.recv()
+
+                    #
+                    # do stuff with data
+                    #
+
+                except websockets.exceptions.ConnectionClosed:
+                    break
+
+            #
+            # Cleanup
+            #
+    """
+
     __srv_limit = None
     __srv_cnt   = 0
 
-    @staticmethod
-    def set_server_limit(limit = None):
+
+    def set_server_limit(self, limit = None):
         # Precondition
         if limit != None or not isinstance(limit, int):
             raise ValueError("Server limit must be an integer or None.")
 
-        self.__srv_limit(limit)
+        WSServer.__srv_limit = limit
 
     def __reserve_conn_id(self):
         ret = self.__conn_cnt
@@ -26,6 +65,16 @@ class WSServer:
         return ret
 
     def __init__(self, address, port, conn_limit = None):
+        """
+        The constructor takes an IPv4 address and a port to listen to, and an
+        optional connection limit.
+
+        Args:
+            address (str): The IPv4 address to bind the socket to.
+            port (int): The port to listen to.
+            conn_limit (int): The limit on the number of connections (defaults
+                to `None`).
+        """
         if WSServer.__srv_limit != None and WSServer.__srv_cnt >= WSServer.__srv_limit:
             raise RuntimeError("Maximum number of {} instances created.".format(self.__class__.__name__))
 
@@ -55,10 +104,16 @@ class WSServer:
 
     @asyncio.coroutine
     def handler(self, websocket, path, conn_id):
+        """
+        Any subclass must implement this method with the required logic.
+        """
         raise NotImplementedError("Subclasses of WSServer must implement the handler coroutine.")
 
     @property
     def is_running(self):
+        """
+        Property to determine whether the server is still up and running.
+        """
         return self.__is_running
 
     def start(self):
