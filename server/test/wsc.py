@@ -4,7 +4,7 @@ import asyncio
 import websockets
 import random
 
-from math import sin, pi
+from math import sin, cos, pi
 
 running = True
 
@@ -19,16 +19,19 @@ def hello():
     t = 0
     try:
         while running:
-            val = sin(2 * pi * t / 100 * OMEGA) * 100
+            y = sin(2 * pi * t / 100 * OMEGA) * 127
+            z = cos(2 * pi * t / 100 * OMEGA) * 127
             t   = (t + 1) % 100
 
-            yield from websocket.send(str(val))
-            log("Sending {}".format(val))
+            val = bytes([0, int(y if y >= 0 else y + 256), int(z if z >= 0 else z + 256)])
+
+            yield from websocket.send(val)
+            log("Sending {}".format(list(val)))
 
             # greeting = yield from websocket.recv()
             # log("< {}".format(greeting))
 
-            yield from asyncio.sleep(0.1)
+            yield from asyncio.sleep(10)
 
     except websockets.exceptions.ConnectionClosed:
         log("Connection Closed. Client shutting down.")
