@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import websockets
 
 from lib.wss import WSServer
@@ -17,6 +18,22 @@ IN4  = 36
 VLIMIT = 6.0  # Volts
 
 
+def bar(label, value, m = 32):
+    size = int(value * m)
+    bar_string = "█" * size + "░" * (m - size)
+    return "{label} {bar} {value:>3}".format(label = label, bar = bar_string, value = int(value * 100))
+
+
+def steering_mapping(value):
+    return (value - 256 if value >= 128 else value) / 64.0 * 100
+
+
+def pedal_mapping(value):
+    if 128 <= value < 256:
+        return ((192 - value) * 25) >> 4
+    return 0
+
+
 class ControllerServer(WSServer):
     """
     Controller WebSocket Server for accepting a single incoming connection from
@@ -33,6 +50,7 @@ class ControllerServer(WSServer):
             v (int): The voltage the H-Bridge is being operated at.
         """
         self._voltage = v
+
 
     @asyncio.coroutine
     def handler(self, websocket, path, conn_id):
@@ -58,12 +76,26 @@ class ControllerServer(WSServer):
             try:
                 x, y, z = yield from websocket.recv()
 
-                y, z = y if y <= 127 else y - 256, z if z <= 127 else z - 256
+                # Y axis - Steering Wheel       range: [-1/4, +1/4] * 256
+                # Z axis - Accelerate / Break   range: [1/4, 0] U [1/4, 1/2] * 256
+                # y, z = y if y <= 127 else y - 256, z if z <= 127 else z - 256
 
-                self.logger.info("{} {}".format((y if y >= 0 else -y) * 100 / 127 * guard_factor, (z if z >= 0 else -z) * 100 / 127 * guard_factor))
+                # self.logger.info("A {} {}".format(y, z))
 
-                hbridge.enable1.set_duty_cycle((y if y >= 0 else -y) * 100 / 127 * guard_factor)
-                hbridge.enable2.set_duty_cycle((z if z >= 0 else -z) * 100 / 127 * guard_factor)
+                print(bar("Y", y / 256.))
+                print(bar("Z", z / 256.))
+
+                y = steering_mapping(y)
+                z = pedal_mapping(z)
+
+                # self.logger.info("B {} {}".format(y, z))
+                print()
+                print(bar("Y", abs(y) / 100.))
+                print(bar("Z", abs(z) / 100.))
+                sys.stdout.write("\033[5A")
+
+                hbridge.enable1.set_duty_cycle(abs(y) * guard_factor)
+                hbridge.enable2.set_duty_cycle(abs(z) * guard_factor)
 
                 hbridge.device1.set(y)
                 hbridge.device2.set(z)
