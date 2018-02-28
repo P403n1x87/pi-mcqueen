@@ -10,10 +10,10 @@ import RPi.GPIO as G
 FREQ = 50  # Hz
 ENB1 = 15
 ENB2 = 12
-IN1  = 29
-IN2  = 7
-IN3  = 18
-IN4  = 36
+IN1  = 7
+IN2  = 29
+IN3  = 36
+IN4  = 18
 
 VLIMIT = 6.0  # Volts
 
@@ -31,7 +31,7 @@ def steering_mapping(value):
 def pedal_mapping(value):
     if 128 <= value < 256:
         return ((192 - value) * 25) >> 4
-    return 0
+    return ((value - 64) * 25) >> 4
 
 
 class ControllerServer(WSServer):
@@ -64,8 +64,8 @@ class ControllerServer(WSServer):
 
         hbridge = HBridge(PMWSignal(ENB1, FREQ)
                          ,PMWSignal(ENB2, FREQ)
-                         ,DCMotor(IN1, IN2)
-                         ,DCMotor(IN4, IN3)
+                         ,DCMotor(IN1, IN2, threshold = 5)
+                         ,DCMotor(IN4, IN3, threshold = 20)
                          )
 
         hbridge.start()
