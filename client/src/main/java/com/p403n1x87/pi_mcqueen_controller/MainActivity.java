@@ -24,6 +24,7 @@ import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
 import com.p403n1x87.pi_mcqueen_controller.GravitySensorManager;
+import com.p403n1x87.pi_mcqueen_controller.RotationManager;
 
 public class MainActivity extends Activity
 {
@@ -40,9 +41,10 @@ public class MainActivity extends Activity
     if (connectSwitch == null) initializeConnectSwitch();
 
     // Sensors
-    GravitySensorManager.init((SensorManager) getSystemService(Context.SENSOR_SERVICE));
+    // RotationManager.init((SensorManager) getSystemService(Context.SENSOR_SERVICE));
+    RotationManager.init((SensorManager) getSystemService(Context.SENSOR_SERVICE));
 
-    if (!GravitySensorManager.hasSensor()) {
+    if (!RotationManager.hasSensor()) {
       // No gravity sensors
       Toast.makeText(getApplicationContext(), "No gravity sensors detected.", Toast.LENGTH_SHORT).show();
       connectSwitch.setEnabled(false);
@@ -70,7 +72,7 @@ public class MainActivity extends Activity
 
       webSocketClient.connect();
 
-      GravitySensorManager.registerWithSocket(webSocketClient);
+      RotationManager.registerWithSocket(webSocketClient);
     } catch (URISyntaxException e) {
       Log.e("pi_mcqueen_controller", "Invalid URI.");
       return;
@@ -82,7 +84,7 @@ public class MainActivity extends Activity
    * WebSocket server
    */
   private void stop() {
-    GravitySensorManager.unregister();
+    RotationManager.unregister();
 
     if (webSocketClient == null) {
       Log.e("pi_mcqueen_controller", "Attempt to close a null WebSocket client.");
