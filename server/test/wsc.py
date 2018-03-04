@@ -8,7 +8,7 @@ from math import sin, cos, pi
 
 running = True
 
-OMEGA = 20.0
+OMEGA = 1.0
 
 def log(msg):
     print("[client] {}".format(msg))
@@ -31,7 +31,7 @@ def hello():
             # greeting = yield from websocket.recv()
             # log("< {}".format(greeting))
 
-            yield from asyncio.sleep(10)
+            yield from asyncio.sleep(1)
 
     except websockets.exceptions.ConnectionClosed:
         log("Connection Closed. Client shutting down.")
