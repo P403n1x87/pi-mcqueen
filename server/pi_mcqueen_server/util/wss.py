@@ -5,7 +5,7 @@ import datetime
 import random
 import websockets
 
-from .utils import logger_factory
+from .log import logger_factory
 
 
 class WSServer:

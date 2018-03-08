@@ -1,4 +1,9 @@
-import RPi.GPIO as G
+try:
+    import RPi.GPIO as G
+except RuntimeError as e:
+    G = None
+    print("WARNING: ".format(str(e)))
+    print("You might only be able to run tests.")
 
 
 def startup():
@@ -12,7 +17,7 @@ def cleanup():
 class DCDevice:
     """
     Abstract class for modelling a DC device operated by a single pair of
-    input wires.
+    input wires.e
 
     This class has no logic, so an actual device should inherit from it and
     declare what to do with the two input wires.
@@ -102,22 +107,22 @@ class Signal:
         raise NotImplementedError("bla")
 
 
-class PMWSignal(Signal):
+class PWMSignal(Signal):
     """
-    Class to model a PMW signal. Besides the GPIO pin, one must also specify a
+    Class to model a PWM signal. Besides the GPIO pin, one must also specify a
     frequency on initialization.
     """
 
     def __init__(self, pin, freq):
         """
         The constructor takes the GPIO pin where the signal is to be applied
-        and the frequence of the PMW signal. By default, the PMW signal is
+        and the frequence of the PWM signal. By default, the PWM signal is
         created with a null duty cycle. Use the `set_duty_cycle` method to
         change this value at runtime.
 
         Args:
             pin (int): The GPIO pin to send the signal to.
-            freq (float): The frequency of the PMW signal.
+            freq (float): The frequency of the PWM signal.
         """
         super().__init__(pin)
 
@@ -127,7 +132,7 @@ class PMWSignal(Signal):
 
     def set_duty_cycle(self, dc):
         """
-        Sets the duty cycle of the PMW signal.
+        Sets the duty cycle of the PWM signal.
 
         Args:
             dc (float): The duty cycle, in the range [0, 100.0]
