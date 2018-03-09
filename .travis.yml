@@ -2,7 +2,7 @@ matrix:
   include:
 
     - language: python
-      python: "{3.4, 3.5, 3.6}"
+      python: "{3.4,3.5,3.6}"
       install: pip3 install "./server[test]"
       before_script: cd server
       script: tox
