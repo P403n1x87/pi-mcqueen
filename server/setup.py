@@ -38,7 +38,8 @@ setup(
         'test': [
             'pytest-cov',
             'mock',
-            'tox-travis'
+            'tox-travis',
+            'coveralls',
         ],
     },
 
