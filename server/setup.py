@@ -34,6 +34,14 @@ setup(
         'websockets==4.0.1',
     ],
 
+    extras_require={
+        'test': [
+            'pytest-cov',
+            'mock',
+            'tox-travis'
+        ],
+    },
+
     entry_points={
         'console_scripts': [
             'pi-mcqueen-server=pi_mcqueen_server.__init__:main',
