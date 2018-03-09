@@ -6,6 +6,8 @@ matrix:
       install: pip3 install "./server[test]"
       before_script: cd server
       script: tox
+      after_success:
+        - coveralls
 
     - language: android
       android:
