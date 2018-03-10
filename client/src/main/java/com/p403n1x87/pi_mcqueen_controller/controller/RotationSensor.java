@@ -1,4 +1,4 @@
-package com.p403n1x87.pi_mcqueen_controller;
+package com.p403n1x87.pi_mcqueen_controller.controller;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,10 +11,12 @@ import java.util.List;
 
 import static java.lang.Math.sqrt;
 
+import com.p403n1x87.pi_mcqueen_controller.controller.Controller;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
-class RotationManager {
+public class RotationSensor implements Controller{
 
   private static Sensor          gyroscopeSensor      = null;
   private static SensorManager   contextSensorManager = null;
@@ -31,8 +33,15 @@ class RotationManager {
       SensorManager.getOrientation(rotationMatrix, orientations);
 
       try {
-        byte[] data = new byte[3];
-        for (int i = 0; i < 3; i++) data[i] = new Float(Math.toDegrees(orientations[i]) / 360 * 256).byteValue();
+        float x = (float) Math.toDegrees(orientations[1]) * (float) (-127. / 45.);
+        if (x < -127) x = -127;
+        if (x >  127) x =  127;
+        float y = (float) Math.toDegrees(orientations[2]) + 90;
+        y *= (float) (-127. / 90.);
+        if (y < -127) y = (float) 127.;
+
+        byte[] data = {new Float(x).byteValue(), new Float(y).byteValue()};
+
         webSocketClient.send(data);
       } catch (WebsocketNotConnectedException e) {
         Log.w("pi_mcqueen_controller", "Sensor updated but socket not connected");
@@ -45,23 +54,27 @@ class RotationManager {
     }
   };
 
-  public static void init(SensorManager sensorManager) {
+  public RotationSensor(SensorManager sensorManager) {
     if (contextSensorManager != null) return;
 
     contextSensorManager = sensorManager;
     gyroscopeSensor = contextSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
   }
 
-  public static boolean hasSensor() {
+  public boolean canControl() {
     return gyroscopeSensor != null;
   }
 
-  public static void registerWithSocket(WebSocketClient socket) {
-    webSocketClient = socket;
-    contextSensorManager.registerListener(LISTENER, gyroscopeSensor, SensorManager.SENSOR_DELAY_FASTEST);
+  public String getName() {
+    return "Built-in Rotation Sensor";
   }
 
-  public static void unregister () {
+  public void registerWithSocket(WebSocketClient socket) {
+    webSocketClient = socket;
+    contextSensorManager.registerListener(LISTENER, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
+  }
+
+  public void unregister () {
     contextSensorManager.unregisterListener(LISTENER);
   }
 }

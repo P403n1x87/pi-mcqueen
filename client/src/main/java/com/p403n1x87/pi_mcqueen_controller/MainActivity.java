@@ -10,46 +10,56 @@ import android.os.Bundle;
 
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
+import android.view.View;
 
 import android.util.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
-import com.p403n1x87.pi_mcqueen_controller.GravitySensorManager;
-import com.p403n1x87.pi_mcqueen_controller.RotationManager;
+import com.p403n1x87.pi_mcqueen_controller.controller.Controller;
+import com.p403n1x87.pi_mcqueen_controller.controller.Gamepad;
+import com.p403n1x87.pi_mcqueen_controller.controller.RotationSensor;
 
 public class MainActivity extends Activity
 {
   private Switch          connectSwitch        = null;
 
   private WebSocketClient webSocketClient      = null;
+  private Controller      controller           = null;
+  private List<Controller> controllerList = new ArrayList<Controller>();
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    Controller rotationSensor = new RotationSensor((SensorManager) getSystemService(Context.SENSOR_SERVICE));
+    if (rotationSensor.canControl()) controllerList.add(rotationSensor);
+
+    Controller gamepad = new Gamepad(findViewById(android.R.id.content));
+    if (gamepad.canControl()) controllerList.add(gamepad);
+
     // UI
     setContentView(R.layout.main_layout);
     if (connectSwitch == null) initializeConnectSwitch();
 
-    // Sensors
-    // RotationManager.init((SensorManager) getSystemService(Context.SENSOR_SERVICE));
-    RotationManager.init((SensorManager) getSystemService(Context.SENSOR_SERVICE));
-
-    if (!RotationManager.hasSensor()) {
-      // No gravity sensors
-      Toast.makeText(getApplicationContext(), "No gravity sensors detected.", Toast.LENGTH_SHORT).show();
+    if (controllerList.size() == 0) {
+      Toast.makeText(getApplicationContext(), "No controllers available.", Toast.LENGTH_SHORT).show();
       connectSwitch.setEnabled(false);
       return;
     }
+
+    addControllerList();
   }
 
   /**
@@ -72,7 +82,7 @@ public class MainActivity extends Activity
 
       webSocketClient.connect();
 
-      RotationManager.registerWithSocket(webSocketClient);
+      controller.registerWithSocket(webSocketClient);
     } catch (URISyntaxException e) {
       Log.e("pi_mcqueen_controller", "Invalid URI.");
       return;
@@ -84,7 +94,7 @@ public class MainActivity extends Activity
    * WebSocket server
    */
   private void stop() {
-    RotationManager.unregister();
+    controller.unregister();
 
     if (webSocketClient == null) {
       Log.e("pi_mcqueen_controller", "Attempt to close a null WebSocket client.");
@@ -108,6 +118,24 @@ public class MainActivity extends Activity
     });
   }
 
+
+  private void addControllerList() {
+    LinearLayout controllerLayout = (LinearLayout) findViewById(R.id.layout_controllers);
+
+    for (Controller c : controllerList) {
+      RadioButton button = new RadioButton(this);
+      final Controller internalController = c;
+      button.setText(c.getName());
+      button.setOnClickListener(new View.OnClickListener() {
+
+        public void onClick(View v) {
+          if (controller != null && controller != internalController) controller.unregister();
+          controller = internalController;
+        }
+      });
+      controllerLayout.addView(button);
+    }
+  }
 
   // ===========================================================================
   // WebSocket
