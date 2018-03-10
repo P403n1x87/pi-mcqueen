@@ -1,7 +1,8 @@
 import asyncio
-import mock
+import unittest.mock as mock
 
 import pi_mcqueen_server.controller_server as cs
+
 
 class MockWebSocket:
 
@@ -14,7 +15,7 @@ class MockWebSocket:
 
     @asyncio.coroutine
     def recv(self):
-        self.server._WSServer__is_running = False
+        self.server._Server__is_running = False
         return self.data
 
 
@@ -24,16 +25,8 @@ mock_socket = MockWebSocket(server)
 loop = asyncio.get_event_loop()
 
 
-def setup_module():
-    pass
-
-
-def teardown_module():
-    pass
-
-
 def send_value(value):
-    server._WSServer__is_running = True
+    server._Server__is_running = True
     mock_socket.send(bytes([0, 0]))
     loop.run_until_complete(server.handler(mock_socket, "/", 0))
 

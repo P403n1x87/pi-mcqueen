@@ -2,11 +2,11 @@ import asyncio
 import sys
 import websockets
 
-from pi_mcqueen_server.util.wss        import WSServer
-from pi_mcqueen_server.util.log        import debug, bar, move_up
-
+import pi_mcqueen_server.util.websocket  as websocket
 import pi_mcqueen_server.util.components as comp
-# from pi_mcqueen_server.util.components import HBridge, DCMotor, PWMSignal, cleanup, startup
+
+from pi_mcqueen_server.util.log import debug, bar, move_up
+
 
 FREQ = 50  # Hz
 ENB1 = 15
@@ -24,7 +24,7 @@ def normalize(value):
     return (value - 256 if value & 128 else value) * 100 / 127
 
 
-class ControllerServer(WSServer):
+class ControllerServer(websocket.Server):
     """
     Controller WebSocket Server for accepting a single incoming connection from
     a controlling device.

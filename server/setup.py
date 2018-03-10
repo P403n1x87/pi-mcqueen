@@ -37,7 +37,6 @@ setup(
     extras_require={
         'test': [
             'pytest-cov',
-            'mock',
             'tox-travis',
             'coveralls',
         ],

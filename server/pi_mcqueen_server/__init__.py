@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import argparse
-import sys
 
-from pi_mcqueen_server.controller_server import ControllerServer
-from pi_mcqueen_server.util.log          import set_debug
+import pi_mcqueen_server.controller_server as cs
+
+from pi_mcqueen_server.util.log import set_debug
 
 def main():
     parser = argparse.ArgumentParser(description='Pi McQueen Controller Server.')
@@ -24,10 +22,6 @@ def main():
 
     set_debug(args.debug)
 
-    gl = ControllerServer("0.0.0.0", 5678, conn_limit = 1)
-    gl.set_voltage(args.n)
-    gl.start()
-
-
-if __name__ == "__main__":
-    main()
+    server = cs.ControllerServer("0.0.0.0", 5678, conn_limit = 1)
+    server.set_voltage(args.n)
+    server.start()

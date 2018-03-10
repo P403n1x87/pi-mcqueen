@@ -17,7 +17,7 @@ def cleanup():
 class DCDevice:
     """
     Abstract class for modelling a DC device operated by a single pair of
-    input wires.e
+    input wires.
 
     This class has no logic, so an actual device should inherit from it and
     declare what to do with the two input wires.
