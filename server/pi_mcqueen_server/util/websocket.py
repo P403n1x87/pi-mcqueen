@@ -47,9 +47,6 @@ class Server:
             # Cleanup
             #
     """
-    __srv_limit = None
-    __srv_cnt   = 0
-
     def __init__(self, address, port, conn_limit = None):
         """
         The constructor takes an IPv4 address and a port to listen to, and an
@@ -61,9 +58,6 @@ class Server:
             conn_limit (int): The limit on the number of connections (defaults
                 to `None`).
         """
-        if Server.__srv_limit != None and Server.__srv_cnt >= Server.__srv_limit:
-            raise RuntimeError("Maximum number of {} instances created.".format(self.__class__.__name__))
-
         self.__is_running = False
         self.__conn_cnt   = 0
 
@@ -71,20 +65,7 @@ class Server:
         self.port       = port
         self.conn_limit = conn_limit
 
-        Server.__srv_cnt += 1
-
         self.logger = logger_factory("{cls}@{address}:{port}".format(cls = self.__class__.__name__, address = address, port = port))
-
-    def __del__(self):
-        Server.__srv_cnt -= 1
-
-    @staticmethod
-    def set_limit(limit = None):
-        # Precondition
-        if limit is not None and not isinstance(limit, int):
-            raise ValueError("Server limit must be an integer or None.")
-
-        Server.__srv_limit = limit
 
     def __reserve_conn_id(self):
         ret = self.__conn_cnt

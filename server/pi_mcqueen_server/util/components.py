@@ -101,10 +101,10 @@ class Signal:
         G.setup(pin, G.OUT)
 
     def start(self):
-        raise NotImplementedError("bla")
+        raise NotImplementedError("Cannot start an abstract signal.")
 
     def stop(self):
-        raise NotImplementedError("bla")
+        raise NotImplementedError("Cannot stop an abstract signal.")
 
 
 class PWMSignal(Signal):
