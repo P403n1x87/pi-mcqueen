@@ -1,5 +1,15 @@
-language: android
-android:
-  components:
-    - build-tools-26.0.1
-    - android-23
+matrix:
+  include:
+
+    - language: python
+      python: 3.4
+      install: pip3 install "./server[test]"
+      before_script: cd server
+      script: tox
+      after_success: coveralls
+
+    - language: android
+      android:
+        components:
+          - build-tools-26.0.1
+          - android-23

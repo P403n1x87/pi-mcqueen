@@ -1,0 +1,4 @@
+[run]
+omit=
+  pi_mcqueen_server/util/log.py
+  pi_mcqueen_server/util/__init__.py
